@@ -2,7 +2,15 @@ import numpy as np
 import torch
 from torchvision.utils import make_grid
 from base import BaseTrainer
+from torch.autograd import Variable
 
+
+def repackage_hidden(h):
+    """Wraps hidden states in new Variables, to detach them from their history."""
+    if type(h) == Variable:
+        return Variable(h.data)
+    else:
+        return tuple(repackage_hidden(v) for v in h)
 
 class Trainer(BaseTrainer):
     """
@@ -25,7 +33,7 @@ class Trainer(BaseTrainer):
         acc_metrics = np.zeros(len(self.metrics))
         for i, metric in enumerate(self.metrics):
             acc_metrics[i] += metric(output, target)
-            self.writer.add_scalar(f'{metric.__name__}', acc_metrics[i])
+            self.writer.add_scalar('metric.__name__', acc_metrics[i])
         return acc_metrics
 
     def _train_epoch(self, epoch):
@@ -49,9 +57,16 @@ class Trainer(BaseTrainer):
         total_loss = 0
         total_metrics = np.zeros(len(self.metrics))
         for batch_idx, (data, target) in enumerate(self.data_loader):
-            data, target = data.to(self.device), target.to(self.device)
+            data = torch.tensor(data, dtype=torch.float, device=self.device)
+            target = torch.tensor(target, dtype=torch.long, device=self.device)
+            
+            # data, target = data.to(self.device), target.to(self.device)
+            self.model.hidden = self.model.init_hidden()
+            # self.model.hidden[1].detach()
 
+            # hidden = hidden.detach()
             self.optimizer.zero_grad()
+            self.model.zero_grad()
             output = self.model(data)
             loss = self.loss(output, target)
             loss.backward()
@@ -99,7 +114,8 @@ class Trainer(BaseTrainer):
         total_val_metrics = np.zeros(len(self.metrics))
         with torch.no_grad():
             for batch_idx, (data, target) in enumerate(self.valid_data_loader):
-                data, target = data.to(self.device), target.to(self.device)
+                data = torch.tensor(data, dtype=torch.float, device=self.device)
+                target = torch.tensor(target, dtype=torch.long, device=self.device)
 
                 output = self.model(data)
                 loss = self.loss(output, target)

@@ -1,19 +1,23 @@
 {
-    "name": "Mnist_LeNet",
-    "n_gpu": 1,
+    "name": "Stroker",
+    "n_gpu": 0,
     
     "arch": {
-        "type": "MnistModel",
-        "args": {}
+        "type": "StrokeModel",
+        "args": {
+            "embedding_dim": 2, 
+            "hidden_dim": 10, 
+            "num_classes": 97
+        }
     },
     "data_loader": {
-        "type": "MnistDataLoader",
+        "type": "UJIDataLoader",
         "args":{
             "data_dir": "data/",
-            "batch_size": 128,
+            "batch_size": 1,
             "shuffle": true,
-            "validation_split": 0.1,
-            "num_workers": 2
+            "validation_split": 0.2,
+            "num_workers": 0
         }
     },
     "optimizer": {
