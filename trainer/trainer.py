@@ -61,10 +61,9 @@ class Trainer(BaseTrainer):
             target = torch.tensor(target, dtype=torch.long, device=self.device)
             
             # data, target = data.to(self.device), target.to(self.device)
-            self.model.hidden = self.model.init_hidden()
-            # self.model.hidden[1].detach()
+            self.model.hidden1 = self.model.init_hidden1()
+            self.model.hidden2 = self.model.init_hidden2()
 
-            # hidden = hidden.detach()
             self.optimizer.zero_grad()
             self.model.zero_grad()
             output = self.model(data)
@@ -78,12 +77,12 @@ class Trainer(BaseTrainer):
             total_metrics += self._eval_metrics(output, target)
 
             if self.verbosity >= 2 and batch_idx % self.log_step == 0:
-                self.logger.info('Train Epoch: {} [{}/{} ({:.0f}%)] Loss: {:.6f}'.format(
-                    epoch,
-                    batch_idx * self.data_loader.batch_size,
-                    self.data_loader.n_samples,
-                    100.0 * batch_idx / len(self.data_loader),
-                    loss.item()))
+                # self.logger.info('Train Epoch: {} [{}/{} ({:.0f}%)] Loss: {:.6f}'.format(
+                #     epoch,
+                #     batch_idx * self.data_loader.batch_size,
+                #     self.data_loader.n_samples,
+                #     100.0 * batch_idx / len(self.data_loader),
+                #     loss.item()))
                 self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
 
         log = {

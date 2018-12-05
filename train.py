@@ -10,7 +10,7 @@ import model.model as module_arch
 from trainer import Trainer
 from utils import Logger
 
-
+torch.set_num_threads(4)
 def get_instance(module, name, config, *args):
     return getattr(module, config[name]['type'])(*args, **config[name]['args'])
 

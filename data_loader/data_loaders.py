@@ -20,7 +20,6 @@ class UJIDataLoader(BaseDataLoader):
         labels = list(np.unique(df.label))
         for i in range(len(df)):
             out.append([df.loc[i].seq, labels.index(df.loc[i].label)])
-        print (out[-1])
         return out
 
     def create(self, file_name):
@@ -30,25 +29,27 @@ class UJIDataLoader(BaseDataLoader):
         character_dict = self.isolate_char(lines)
         # np.array()
         df = pd.DataFrame(character_dict)
+        df.to_csv(self.data_dir+file_name+".csv")
         df.to_pickle(self.data_dir+file_name+".pkl")
         return
 
     def isolate_char(self, lines):
-        chars = {'seq': [], 'label': [], 'label_ix': []}
+        chars = { 'seq': [], 'label': [] }
         char_set = []
+        isascii = lambda s: len(s) == len(s.encode())
         for i in range(len(lines)):
             words = lines[i].split()
-            if words[0] == 'WORD':
+            if words[0] == 'WORD' and isascii(words[1]):
                 num_strokes = int(lines[i+1].strip().split()[1])
                 character = words[1]
                 sequence = self.stroke_sequence([ lines[i+2+k].strip() for k in range(num_strokes) ])
                 chars['seq'].append(self.normalize(sequence))
                 chars['label'].append(character)
                 char_set.append(character)
-        for c in chars['label']:
-            for i, x in enumerate(np.unique(char_set)):
-                if(x == c):
-                    chars['label_ix'].append(i)
+        # for c in chars['label']:
+        #     for i, x in enumerate(np.unique(char_set)):
+        #         if(x == c):
+        #             chars['label_ix'].append(i)
         return chars
 
     def stroke_sequence(self, strokes):
@@ -66,4 +67,4 @@ class UJIDataLoader(BaseDataLoader):
 
 if __name__ == "__main__":
     loader = UJIDataLoader('data/',1,True,0.2,2)
-    # loader.create("ujipenchars2.txt")
+    loader.create("ujipenchars2.txt")
